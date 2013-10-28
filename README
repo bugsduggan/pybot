@@ -1,0 +1,23 @@
+A simple python IRC bot for my own amusement
+============================================
+
+CLI args
+========
+
+You can invoke the bot using the run.py script. It takes the following
+arguments/flags.
+
+-s --server   The server to connect to
+-p --port     The port to connect to
+-n --nick     The nick the bot will use
+-a --nickserv The name of nickserv on the network you're connecting to
+-w --password The password for nickserv
+-v --verbose  Turn on verbose logging (see every message)
+
+The run.py script will also take a list of channels. These will
+probably need to be escaped from a BASH terminal as it likes to interpret
+# symbols as being special.
+
+To connect to AberWiki and join #lolhax:
+
+./run.py -s irc.aberwiki.org -p 6667 -a zippy -w secret "#lolhax"
