@@ -21,3 +21,14 @@ probably need to be escaped from a BASH terminal as it likes to interpret
 To connect to AberWiki and join #lolhax:
 
 ./run.py -s irc.aberwiki.org -p 6667 -a zippy -w secret "#lolhax"
+
+TODO list
+=========
+
+Allow setting command char from command line
+Allow setting all config from a json config file
+Implement the rest of the builtin commands
+Write some more plugins
+Add support for trigger functions
+Add support for admin control - currently anyone can do anything!
+Add support for admin_command functions
