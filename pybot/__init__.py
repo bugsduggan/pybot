@@ -78,7 +78,7 @@ class command(object):
             func_args[name] = kwargs.get(name, default)
 
         self.plugin.logger.info('executing %s with args %r' % (
-                self.func.func_name, func_args))
+            self.func.func_name, func_args))
         self.func(self.plugin, **func_args)
 
     def __repr__(self):
