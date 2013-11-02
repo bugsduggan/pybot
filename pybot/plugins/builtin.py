@@ -32,7 +32,11 @@ class Builtin(PybotPlugin):
         %(command)s [<channel>]
         """
         if message is not None:
-            self.bot.send('PART %s' % message)
+            if message.split()[0].startswith('#') or \
+                    message.split()[0].startswith('@'):
+                channel = message.split()[0]
+                message = ' '.join(message.split()[1:])
+            self.bot.send('PART %s %s' % (channel, message))
         else:
             self.bot.send('PART %s' % channel)
 
