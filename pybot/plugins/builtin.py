@@ -28,8 +28,10 @@ class Builtin(PybotPlugin):
         pass
 
     @command
-    def commands(self, message):
-        pass
+    def commands(self, channel, user):
+        commands = self.bot.commands()
+        self.bot.send_privmsg(channel, '%s: %r' %
+                              (user, ' '.join([cmd.name for cmd in commands])))
 
     @command
     def plugins(self, message):

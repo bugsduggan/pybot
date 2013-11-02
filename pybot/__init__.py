@@ -54,6 +54,7 @@ class command(object):
 
     def __init__(self, func, context=CONTEXT_ALL):
         self.func = func
+        self.name = self.func.func_name
         self.context = context
         self.plugin = None
 
@@ -214,9 +215,18 @@ class Pybot(object):
                 if command.match(cmd, context):
                     command(**kwargs)
 
+    def commands(self):
+        commands = [cmd for cmd in self.builtin]
+        for plugin in self.plugins:
+            commands.extend([cmd for cmd in plugin])
+        return commands
+
     def send(self, message):
         logger.debug('>> %s' % message)
         self.socket.send(message + '\n')
+
+    def send_privmsg(self, channel, message):
+        self.send('PRIVMSG %s :%s' % (channel, message))
 
 
 def run(args):
