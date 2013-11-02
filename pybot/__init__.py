@@ -51,6 +51,19 @@ def load_plugin(plugin_name):
     return plugin_instance
 
 
+def split_message(message):
+    lines = list()
+    for line in message.split('\n'):
+        while len(line) > MAX_MESSAGE_LEN:
+            start = line[:MAX_MESSAGE_LEN]
+            if start != '':
+                lines.append(start)
+            line = line[MAX_MESSAGE_LEN:]
+        if line != '':
+            lines.append(line)
+    return lines
+
+
 class command(object):
 
     def __init__(self, func, context=CONTEXT_ALL):
@@ -81,6 +94,20 @@ class command(object):
             self.func.func_name, func_args))
         self.func(self.plugin, **func_args)
 
+    def get_help(self):
+        if not self.plugin:
+            raise UnboundCommandExecutionException
+
+        docstring = self.func.__doc__
+        if docstring is None or docstring == '':
+            return 'No help available for command "%s"' % self.name
+        else:
+            command_char = self.plugin.bot.command_char
+            lines = docstring.split('\n')
+            lines = [l.strip() for l in lines]
+            docstring = '\n'.join(lines)
+            return docstring % {'command': command_char + self.name}
+
     def __repr__(self):
         if self.plugin:
             return '<%s command %s>' % (self.plugin, self.func.func_name)
@@ -90,10 +117,9 @@ class command(object):
     def _set_plugin(self, plugin):
         self.plugin = plugin
 
-    def match(self, cmd, context):
+    def match(self, context):
         if self.context is CONTEXT_ALL or self.context == context:
-            if cmd == self.func.func_name:
-                return True
+            return True
         return False
 
 
@@ -206,32 +232,30 @@ class Pybot(object):
         else:
             cmd = cmd[1:]
 
-        for command in self.builtin:
-            if command.match(cmd, context):
-                command(**kwargs)
-                return
+        command = self.get_command(cmd)
+        if command is not None and command.match(context):
+            command(**kwargs)
 
+    def get_command(self, cmd_name):
+        for command in self.builtin:
+            if command.name == cmd_name:
+                return command
         for plugin in self.plugins:
             for command in plugin:
-                if command.match(cmd, context):
-                    command(**kwargs)
+                if command.name == cmd_name:
+                    return command
+        return None
 
-    def _send(self, message):
+    def send(self, message):
         logger.debug('>> %s' % message)
         self.socket.send(message + '\n')
 
-    def send(self, message):
-        for line in message.split('\n'):
-            while len(line) > 510:
-                start = line[:510]
-                if start != '':
-                    self._send(start)
-                line = line[510:]
-            if line != '':
-                self._send(line)
-
-    def send_privmsg(self, channel, message):
-        self.send('PRIVMSG %s :%s' % (channel, message))
+    def send_privmsg(self, channel, message, target=None):
+        for line in split_message(message):
+            if target is not None:
+                self.send('PRIVMSG %s :%s: %s' % (channel, target, line))
+            else:
+                self.send('PRIVMSG %s : %s' % (channel, line))
 
 
 def run(args):
