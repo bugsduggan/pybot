@@ -17,8 +17,11 @@ class Builtin(PybotPlugin):
         self.bot.send('JOIN %s' % message)
 
     @command
-    def part(self, message):
-        self.bot.send('PART %s' % message)
+    def part(self, message, channel):
+        if message is not None:
+            self.bot.send('PART %s' % message)
+        else:
+            self.bot.send('PART %s' % channel)
 
     @command
     def help(self, message):
