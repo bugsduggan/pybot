@@ -176,7 +176,7 @@ class Pybot(object):
         logger.debug('<< %s' % message)
 
         if message.startswith('PING'):
-            self._send('PONG ' + message.split()[1])
+            self.send('PONG ' + message.split()[1])
 
         if message.split()[1] == 'PRIVMSG':
             self.process_privmsg(message)
