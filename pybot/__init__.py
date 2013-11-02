@@ -8,6 +8,7 @@ import logging
 import os
 import re
 import socket
+import json
 
 from pybot.constants import *
 
@@ -271,12 +272,22 @@ def run(args):
                         help='The name of nickserv.')
     parser.add_argument('-w', '--password', default='',
                         help='The bot\'s nickserv password.')
+    parser.add_argument('-c', '--config', default='config.json',
+                        help='The config file to use.')
     parser.add_argument('-v', '--verbose', action='store_true',
                         default=False,
                         help='Turn on verbose logging.')
     parser.add_argument('channels', nargs='*', default=[])
 
     args = parser.parse_args(args)
+
+    if os.path.isfile(args.config):
+        with open(args.config) as f:
+            config = json.load(f)
+            for key, value in config.iteritems():
+                if hasattr(args, key):
+                    setattr(args, key, value)
+
     if args.verbose:
         logger.setLevel(logging.DEBUG)
 
