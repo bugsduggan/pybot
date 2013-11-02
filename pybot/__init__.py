@@ -216,15 +216,6 @@ class Pybot(object):
                 if command.match(cmd, context):
                     command(**kwargs)
 
-    def get_commands(self):
-        commands = [cmd for cmd in self.builtin]
-        for plugin in self.plugins:
-            commands.extend([cmd for cmd in plugin])
-        return commands
-
-    def get_plugins(self):
-        return [self.builtin] + self.plugins.values()
-
     def _send(self, message):
         logger.debug('>> %s' % message)
         self.socket.send(message + '\n')

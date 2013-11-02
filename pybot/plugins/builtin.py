@@ -28,16 +28,23 @@ class Builtin(PybotPlugin):
         pass
 
     @command
-    def commands(self, channel, user):
-        commands = self.bot.get_commands()
-        command_string = ' '.join([cmd.name for cmd in commands])
-        self.bot.send_privmsg(channel, '%s: %s' %
+    def foobar(self, channel, user):
+        command_string = ' '.join(
+            [cmd.name for cmd in self.bot.builtin.commands])
+        self.bot.send_privmsg(channel, '%s: builtin - %s' %
                               (user, command_string))
+        for plugin_name, plugin in self.bot.plugins.iteritems():
+            command_string = ' '.join([cmd.name for cmd in plugin.commands])
+            self.bot.send_privmsg(channel, '%s: %s - %s' %
+                                  (user, plugin_name, command_string))
 
     @command
     def plugins(self, channel, user):
-        plugins = self.bot.get_plugins()
-        plugin_string = ' '.join([plugin.name for plugin in plugins])
+        plugins = self.bot.plugins
+        if len(plugins) <= 0:
+            self.bot.send_privmsg(channel, '%s: no plugins loaded' % user)
+            return
+        plugin_string = ' '.join(plugins.keys())
         self.bot.send_privmsg(channel, '%s: %s' %
                               (user, plugin_string))
 
