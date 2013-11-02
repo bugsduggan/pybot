@@ -9,6 +9,8 @@ import os
 import re
 import socket
 
+from pybot.constants import *
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 console = logging.StreamHandler()
@@ -19,10 +21,6 @@ console.setFormatter(formatter)
 logger.addHandler(console)
 
 DIR = os.path.abspath(os.path.dirname(__file__))
-
-CONTEXT_ALL = 0
-CONTEXT_CHANNEL = 1
-CONTEXT_QUERY = 2
 
 
 class PluginNotFoundException(Exception):
