@@ -29,13 +29,17 @@ class Builtin(PybotPlugin):
 
     @command
     def commands(self, channel, user):
-        commands = self.bot.commands()
-        self.bot.send_privmsg(channel, '%s: %r' %
-                              (user, ' '.join([cmd.name for cmd in commands])))
+        commands = self.bot.get_commands()
+        command_string = ' '.join([cmd.name for cmd in commands])
+        self.bot.send_privmsg(channel, '%s: %s' %
+                              (user, command_string))
 
     @command
-    def plugins(self, message):
-        pass
+    def plugins(self, channel, user):
+        plugins = self.bot.get_plugins()
+        plugin_string = ' '.join([plugin.name for plugin in plugins])
+        self.bot.send_privmsg(channel, '%s: %s' %
+                              (user, plugin_string))
 
     @command
     def reload(self, message):
