@@ -32,25 +32,6 @@ class UnboundCommandExecutionException(Exception):
     pass
 
 
-def load_plugin(plugin_name):
-    path = os.path.join(DIR, 'plugins', plugin_name + '.py')
-
-    if not os.path.isfile(path):
-        raise PluginNotFoundException
-
-    plugin_module = importlib.import_module('pybot.plugins.' + plugin_name)
-    plugin_class = getattr(plugin_module, plugin_name.capitalize())
-    plugin_logger = logger.getChild(plugin_name)
-    plugin_instance = plugin_class(plugin_name, plugin_logger)
-
-    for cmd_namd, cmd_obj in inspect.getmembers(
-            plugin_instance, lambda func: isinstance(func, command)):
-        cmd_obj._set_plugin(plugin_instance)
-        plugin_instance._add_command(cmd_obj)
-
-    return plugin_instance
-
-
 def split_message(message):
     lines = list()
     for line in message.split('\n'):
@@ -173,8 +154,8 @@ class Pybot(object):
         for channel in self.channels:
             self.send('JOIN %s' % channel)
 
-        self.builtin = load_plugin('builtin')
-        self.builtin._set_bot(self)
+        self.load_plugin('builtin')
+        self.builtin = self.plugins.pop('builtin')
 
         self.listen()
 
@@ -199,6 +180,26 @@ class Pybot(object):
 
             for msg in msg_chunks:
                 self.process_message(msg.strip('\r'))
+
+    def load_plugin(self, plugin_name):
+        path = os.path.join(DIR, 'plugins', plugin_name + '.py')
+
+        if not os.path.isfile(path):
+            raise PluginNotFoundException
+
+        plugin_module = importlib.import_module(
+            'pybot.plugins.' + plugin_name)
+        plugin_class = getattr(plugin_module, plugin_name.capitalize())
+        plugin_logger = logger.getChild(plugin_name)
+        plugin_instance = plugin_class(plugin_name, plugin_logger)
+
+        for cmd_namd, cmd_obj in inspect.getmembers(
+                plugin_instance, lambda func: isinstance(func, command)):
+            cmd_obj._set_plugin(plugin_instance)
+            plugin_instance._add_command(cmd_obj)
+
+        plugin_instance._set_bot(self)
+        self.plugins[plugin_name] = plugin_instance
 
     def process_message(self, message):
         logger.debug('<< %s' % message)
@@ -240,7 +241,7 @@ class Pybot(object):
         for command in self.builtin:
             if command.name == cmd_name:
                 return command
-        for plugin in self.plugins:
+        for plugin in self.plugins.values():
             for command in plugin:
                 if command.name == cmd_name:
                     return command

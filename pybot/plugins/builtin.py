@@ -1,7 +1,7 @@
 import sys
 import time
 
-from pybot import PybotPlugin, command
+from pybot import PybotPlugin, command, PluginNotFoundException
 
 
 class Builtin(PybotPlugin):
@@ -57,7 +57,7 @@ class Builtin(PybotPlugin):
         self.bot.send_privmsg(channel, '%s' % help_string, target=user)
 
     @command
-    def commands(self, channel, user):
+    def foobar(self, channel, user):
         """
         Shows all available commands.
         %(command)s
@@ -100,8 +100,17 @@ class Builtin(PybotPlugin):
         pass
 
     @command
-    def load(self, message):
+    def load(self, message, channel, user):
         """
         Not implemented.
         """
-        pass
+        try:
+            self.bot.load_plugin(message)
+            self.bot.send_privmsg(channel, '%s plugin loaded' %
+                                  message, target=user)
+        except PluginNotFoundException:
+            self.bot.send_privmsg(channel, '%s plugin not found' %
+                                  message, target=user)
+        except Exception as err:
+            self.bot.send_privmsg(channel, '%s: %s' %
+                                  (repr(err), err.message), target=user)
