@@ -21,6 +21,7 @@ console.setFormatter(formatter)
 logger.addHandler(console)
 
 DIR = os.path.abspath(os.path.dirname(__file__))
+MAX_MESSAGE_LEN = 510
 
 
 class PluginNotFoundException(Exception):
@@ -224,9 +225,19 @@ class Pybot(object):
     def get_plugins(self):
         return [self.builtin] + self.plugins.values()
 
-    def send(self, message):
+    def _send(self, message):
         logger.debug('>> %s' % message)
         self.socket.send(message + '\n')
+
+    def send(self, message):
+        for line in message.split('\n'):
+            while len(line) > 510:
+                start = line[:510]
+                if start != '':
+                    self._send(start)
+                line = line[510:]
+            if line != '':
+                self._send(line)
 
     def send_privmsg(self, channel, message):
         self.send('PRIVMSG %s :%s' % (channel, message))
