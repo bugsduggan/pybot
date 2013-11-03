@@ -246,7 +246,10 @@ class Pybot(object):
             context = CONTEXT_QUERY
             kwargs['channel'] = kwargs['user']
 
-        cmd = content.split()[0]
+        try:
+            cmd = content.split()[0]
+        except IndexError:
+            return
         if len(content.split()) > 1:
             kwargs['message'] = ' '.join(content.split()[1:])
 
