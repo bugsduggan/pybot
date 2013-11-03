@@ -14,21 +14,18 @@ arguments/flags.
 -w --password The password for nickserv
 -v --verbose  Turn on verbose logging (see every message)
 
-The run.py script will also take a list of channels. These will
+The run.py script will also take the name of its owner and a list of channels. These will
 probably need to be escaped from a BASH terminal as it likes to interpret
 # symbols as being special.
 
 To connect to AberWiki and join #lolhax:
 
-./run.py -s irc.aberwiki.org -p 6667 -a zippy -w secret "#lolhax"
+./run.py -s irc.aberwiki.org -p 6667 -a zippy -w secret overlord "#lolhax"
 
 TODO list
 =========
 
 Allow setting command char from command line
 Allow setting all config from a json config file
-Implement the rest of the builtin commands
 Write some more plugins
 Add support for trigger functions
-Add support for admin control - currently anyone can do anything!
-Add support for admin_command functions
