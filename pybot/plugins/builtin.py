@@ -140,3 +140,16 @@ class Builtin(PybotPlugin):
         except Exception as err:
             self.bot.send_privmsg(channel, '%s: %s' %
                                   (repr(err), err.message), target=user)
+
+    @command
+    def say(self, message, channel):
+        """
+        Makes the bot say something.
+        %(command)s [<channel>] <message>
+        """
+        message = message.strip()
+        if message.split()[0].startswith('#') or \
+                message.split()[0].startswith('@'):
+            channel = message.split()[0]
+            message = ' '.join(message.split()[1:])
+        self.bot.send_privmsg(channel, message)
