@@ -256,7 +256,7 @@ class Pybot(object):
             if target is not None:
                 self.send('PRIVMSG %s :%s: %s' % (channel, target, line))
             else:
-                self.send('PRIVMSG %s : %s' % (channel, line))
+                self.send('PRIVMSG %s :%s' % (channel, line))
 
 
 def run(args):
