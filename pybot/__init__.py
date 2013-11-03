@@ -232,7 +232,7 @@ class Pybot(object):
             self.process_privmsg(message)
 
     def process_privmsg(self, message):
-        matcher = re.search(r'^:.*!(.*)@(.*) PRIVMSG (.*) :(.*)$', message)
+        matcher = re.search(r'^:(.*)!.*@(.*) PRIVMSG (.*) :(.*)$', message)
 
         kwargs = {
             'user': matcher.group(1),
