@@ -109,19 +109,19 @@ class PybotPlugin(object):
     def __init__(self, name, logger):
         self.name = name
         self.logger = logger
-        self.commands = list()
+        self.command_list = list()
         self.bot = None
         self.logger.info('%s plugin loaded' % self.name)
 
     def __iter__(self):
-        for command in self.commands:
+        for command in self.command_list:
             yield command
 
     def __repr__(self):
         return '<%s plugin>' % self.name
 
     def _add_command(self, command):
-        self.commands.append(command)
+        self.command_list.append(command)
         self.logger.info('registered %r' % command)
 
     def _set_bot(self, bot):
@@ -193,7 +193,7 @@ class Pybot(object):
         plugin_logger = logger.getChild(plugin_name)
         plugin_instance = plugin_class(plugin_name, plugin_logger)
 
-        for cmd_namd, cmd_obj in inspect.getmembers(
+        for cmd_name, cmd_obj in inspect.getmembers(
                 plugin_instance, lambda func: isinstance(func, command)):
             cmd_obj._set_plugin(plugin_instance)
             plugin_instance._add_command(cmd_obj)

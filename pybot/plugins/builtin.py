@@ -61,17 +61,18 @@ class Builtin(PybotPlugin):
         self.bot.send_privmsg(channel, '%s' % help_string, target=user)
 
     @command
-    def foobar(self, channel, user):
+    def commands(self, channel, user):
         """
         Shows all available commands.
         %(command)s
         """
         command_string = ' '.join(
-            [cmd.name for cmd in self.bot.builtin.commands])
+            [cmd.name for cmd in self.bot.builtin.command_list])
         self.bot.send_privmsg(channel, 'builtin - %s' %
                               command_string, target=user)
         for plugin_name, plugin in self.bot.plugins.iteritems():
-            command_string = ' '.join([cmd.name for cmd in plugin.commands])
+            command_string = ' '.join(
+                [cmd.name for cmd in plugin.command_list])
             self.bot.send_privmsg(channel, '%s - %s' %
                                   (plugin_name, command_string), target=user)
 
