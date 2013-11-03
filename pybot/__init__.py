@@ -126,6 +126,10 @@ class PybotPlugin(object):
         self.logger = logger
         self.command_list = list()
         self.bot = None
+
+        if hasattr(self, 'init') and callable(self.init):
+            self.init()
+
         self.logger.info('%s plugin loaded' % self.name)
 
     def __iter__(self):
