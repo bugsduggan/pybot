@@ -244,6 +244,7 @@ class Pybot(object):
 
         if kwargs['channel'] == self.nick:
             context = CONTEXT_QUERY
+            kwargs['channel'] = kwargs['user']
 
         cmd = content.split()[0]
         if len(content.split()) > 1:
@@ -274,7 +275,7 @@ class Pybot(object):
 
     def send_privmsg(self, channel, message, target=None):
         for line in split_message(message):
-            if target is not None:
+            if target is not None and target != channel:
                 self.send('PRIVMSG %s :%s: %s' % (channel, target, line))
             else:
                 self.send('PRIVMSG %s :%s' % (channel, line))
