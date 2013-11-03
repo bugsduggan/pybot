@@ -6,6 +6,7 @@ import importlib
 import inspect
 import logging
 import os
+import sys
 import re
 import socket
 import json
@@ -299,8 +300,8 @@ def run(args):
                         help='The name of nickserv.')
     parser.add_argument('-w', '--password', default='',
                         help='The bot\'s nickserv password.')
-    parser.add_argument('-c', '--config', default='config.json',
-                        help='The config file to use.')
+    parser.add_argument('-c', '--config', default='',
+                        help='Load settings from a config file.')
     parser.add_argument('-v', '--verbose', action='store_true',
                         default=False,
                         help='Turn on verbose logging.')
@@ -308,12 +309,15 @@ def run(args):
 
     args = parser.parse_args(args)
 
-    if os.path.isfile(args.config):
-        with open(args.config) as f:
-            config = json.load(f)
-            for key, value in config.iteritems():
-                if hasattr(args, key):
-                    setattr(args, key, value)
+    if args.config:
+        if os.path.isfile(args.config):
+            with open(args.config) as f:
+                for key, value in json.load(f).iteritems():
+                    if hasattr(args, key):
+                        setattr(args, key, value)
+        else:
+            print 'Cannot load config file "%s": No such file' % args.config
+            sys.exit(1)
 
     if args.verbose:
         logger.setLevel(logging.DEBUG)
