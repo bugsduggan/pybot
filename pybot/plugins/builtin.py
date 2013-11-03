@@ -1,12 +1,12 @@
 import sys
 import time
 
-from pybot import PybotPlugin, command, PluginNotFoundException
+from pybot import PybotPlugin, command, PluginNotFoundException, admin_command
 
 
 class Builtin(PybotPlugin):
 
-    @command
+    @admin_command
     def quit(self, message='I\'m outta here'):
         """
         %(command)s [<message>]
@@ -16,7 +16,7 @@ class Builtin(PybotPlugin):
         time.sleep(1)
         sys.exit(1)
 
-    @command
+    @admin_command
     def join(self, message):
         """
         %(command)s <channel>
@@ -24,7 +24,7 @@ class Builtin(PybotPlugin):
         """
         self.bot.send('JOIN %s' % message)
 
-    @command
+    @admin_command
     def part(self, message, channel):
         """
         %(command)s [<channel>] [<message>]
@@ -47,7 +47,6 @@ class Builtin(PybotPlugin):
         Provides general help and help for specific commands.
         """
         if message is None:
-            # general help
             help_string = 'Use %shelp <command> for help with a specific ' \
                 'command.\n%scommands will list all available commands.' % \
                 (self.bot.command_char, self.bot.command_char)
@@ -90,7 +89,7 @@ class Builtin(PybotPlugin):
         self.bot.send_privmsg(channel, '%s' %
                               plugin_string, target=user)
 
-    @command
+    @admin_command
     def reload(self, message, channel, user):
         """
         %(command)s <plugin>
@@ -111,7 +110,7 @@ class Builtin(PybotPlugin):
             self.bot.send_privmsg(channel, '%s: %s' %
                                   (repr(err), err.message), target=user)
 
-    @command
+    @admin_command
     def unload(self, message, channel, user):
         """
         %(command)s <plugin>
@@ -125,7 +124,7 @@ class Builtin(PybotPlugin):
             self.bot.send_privmsg(channel, '%s plugin not found' %
                                   message, target=user)
 
-    @command
+    @admin_command
     def load(self, message, channel, user):
         """
         %(command)s <plugin>
@@ -164,7 +163,7 @@ class Builtin(PybotPlugin):
         admin_list = self.bot.admins
         self.bot.send_privmsg(channel, '%s' % admin_list, target=user)
 
-    @command
+    @admin_command
     def mkadmin(self, channel, user, message):
         """
         %(command)s <user>
@@ -178,7 +177,7 @@ class Builtin(PybotPlugin):
         self.bot.send_privmsg(channel, '%s is now an admin' % message,
                               target=user)
 
-    @command
+    @admin_command
     def rmadmin(self, channel, user, message):
         """
         %(command)s <user>

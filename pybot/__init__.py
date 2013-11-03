@@ -104,6 +104,18 @@ class command(object):
         return False
 
 
+class admin_command(command):
+
+    def __call__(self, **kwargs):
+        if not self.plugin:
+            raise UnboundCommandExecutionException
+        if kwargs['user'] in self.plugin.bot.admins:
+            super(admin_command, self).__call__(**kwargs)
+        else:
+            self.plugin.logger.warn('admin command (%s) rejected, %s is not '
+                                    'an admin' % (self.name, kwargs['user']))
+
+
 class PybotPlugin(object):
 
     def __init__(self, name, logger):
