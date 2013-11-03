@@ -9,8 +9,8 @@ class Builtin(PybotPlugin):
     @command
     def quit(self, message='I\'m outta here'):
         """
-        Makes the bot quit IRC completely.
         %(command)s [<message>]
+        Makes the bot quit IRC completely.
         """
         self.bot.send('QUIT :%s' % message)
         time.sleep(1)
@@ -19,17 +19,17 @@ class Builtin(PybotPlugin):
     @command
     def join(self, message):
         """
-        Makes the bot join a specified channel.
         %(command)s <channel>
+        Makes the bot join a specified channel.
         """
         self.bot.send('JOIN %s' % message)
 
     @command
     def part(self, message, channel):
         """
+        %(command)s [<channel>] [<message>]
         Parts from a channel. Will part the current channel if no channel
         is specified.
-        %(command)s [<channel>] [<message>]
         """
         if message is not None:
             if message.split()[0].startswith('#') or \
@@ -43,8 +43,8 @@ class Builtin(PybotPlugin):
     @command
     def help(self, message, channel, user):
         """
-        Provides general help and help for specific commands.
         %(command)s [<command>]
+        Provides general help and help for specific commands.
         """
         if message is None:
             # general help
@@ -63,8 +63,8 @@ class Builtin(PybotPlugin):
     @command
     def commands(self, channel, user):
         """
-        Shows all available commands.
         %(command)s
+        Shows all available commands.
         """
         command_string = ' '.join(
             [cmd.name for cmd in self.bot.builtin.command_list])
@@ -79,8 +79,8 @@ class Builtin(PybotPlugin):
     @command
     def plugins(self, channel, user):
         """
-        Shows all loaded plugins.
         %(command)s
+        Shows all loaded plugins.
         """
         plugins = self.bot.plugins
         if len(plugins) <= 0:
@@ -93,8 +93,8 @@ class Builtin(PybotPlugin):
     @command
     def reload(self, message, channel, user):
         """
-        Reloads a plugin.
         %(command)s <plugin>
+        Reloads a plugin.
         """
         try:
             self.bot.plugins.pop(message)
@@ -114,8 +114,8 @@ class Builtin(PybotPlugin):
     @command
     def unload(self, message, channel, user):
         """
-        Unloads a plugin.
         %(command)s <plugin>
+        Unloads a plugin.
         """
         try:
             self.bot.plugins.pop(message)
@@ -128,8 +128,8 @@ class Builtin(PybotPlugin):
     @command
     def load(self, message, channel, user):
         """
-        Loads a plugin.
         %(command)s <plugin>
+        Loads a plugin.
         """
         try:
             self.bot.load_plugin(message)
@@ -145,8 +145,8 @@ class Builtin(PybotPlugin):
     @command
     def say(self, message, channel):
         """
-        Makes the bot say something.
         %(command)s [<channel>] <message>
+        Makes the bot say something.
         """
         message = message.strip()
         if message.split()[0].startswith('#') or \
