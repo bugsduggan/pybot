@@ -39,6 +39,8 @@ class Git(PybotPlugin):
         body = 'Issue created by pybot\'s git plugin by %s in %s' % \
             (user, channel)
         issue = repo.create_issue(title=message, body=body)
+        self.logger.info('GitHub issue #%d created by %s from %s' %
+                         (issue.number, user, channel))
         self.bot.send_privmsg(channel, 'Issue #%d created: %s' %
                               (issue.number, issue.html_url), target=user)
 
