@@ -133,7 +133,7 @@ class Pybot(object):
     def __init__(self, server, port, nick, nickserv, password, channels,
                  command_char):
         self.server = server
-        self.port = port
+        self.port = int(port)
         self.nick = nick
         self.nickserv = nickserv
         self.password = password
