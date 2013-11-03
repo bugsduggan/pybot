@@ -131,7 +131,7 @@ class PybotPlugin(object):
 class Pybot(object):
 
     def __init__(self, server, port, nick, nickserv, password, channels,
-                 command_char):
+                 command_char, owner):
         self.server = server
         self.port = int(port)
         self.nick = nick
@@ -141,6 +141,8 @@ class Pybot(object):
         self.command_char = command_char
         self.builtin = None
         self.plugins = dict()
+        self.owner = owner
+        self.admins = [owner]
 
     def connect(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -262,6 +264,7 @@ class Pybot(object):
 def run(args):
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('owner', help='The bot\'s lord and master.')
     parser.add_argument('-s', '--server', default='localhost',
                         help='The server to connect to.')
     parser.add_argument('-p', '--port', default=6667,
@@ -286,5 +289,5 @@ def run(args):
 
     # TODO fix command char
     pybot = Pybot(args.server, args.port, args.nick, args.nickserv,
-                  args.password, args.channels, '@')
+                  args.password, args.channels, '@', args.owner)
     pybot.connect()

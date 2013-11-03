@@ -154,3 +154,48 @@ class Builtin(PybotPlugin):
             channel = message.split()[0]
             message = ' '.join(message.split()[1:])
         self.bot.send_privmsg(channel, message)
+
+    @command
+    def admins(self, channel, user):
+        """
+        %(command)s
+        Lists all admins.
+        """
+        admin_list = self.bot.admins
+        self.bot.send_privmsg(channel, '%s' % admin_list, target=user)
+
+    @command
+    def mkadmin(self, channel, user, message):
+        """
+        %(command)s <user>
+        Grants a user admin privileges.
+        """
+        if message is None:
+            self.bot.send_privmsg(channel, 'You must specify a user',
+                                  target=user)
+            return
+        self.bot.admins.append(message)
+        self.bot.send_privmsg(channel, '%s is now an admin' % message,
+                              target=user)
+
+    @command
+    def rmadmin(self, channel, user, message):
+        """
+        %(command)s <user>
+        Removes admin privileges from a user.
+        """
+        if message is None:
+            self.bot.send_privmsg(channel, 'You must specify a user',
+                                  target=user)
+            return
+        if message == self.bot.owner:
+            self.bot.send_privmsg(channel, 'You can\'t remove the '
+                                  'owner\'s admin priveleges', target=user)
+            return
+        try:
+            self.bot.admins.remove(message)
+            self.bot.send_privmsg(channel, '%s is no longer an admin' %
+                                  message, target=user)
+        except ValueError:
+            self.bot.send_privmsg(channel, '%s is not an admin' % message,
+                                  target=user)
