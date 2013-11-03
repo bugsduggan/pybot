@@ -73,7 +73,10 @@ class command(object):
 
         self.plugin.logger.info('executing %s with args %r' % (
             self.func.func_name, func_args))
-        self.func(self.plugin, **func_args)
+        try:
+            self.func(self.plugin, **func_args)
+        except Exception as err:
+            self.plugin.logger.exception(err)
 
     def get_help(self):
         if not self.plugin:
