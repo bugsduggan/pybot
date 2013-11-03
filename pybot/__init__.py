@@ -33,25 +33,6 @@ class UnboundCommandExecutionException(Exception):
     pass
 
 
-def load_plugin(plugin_name):
-    path = os.path.join(DIR, 'plugins', plugin_name + '.py')
-
-    if not os.path.isfile(path):
-        raise PluginNotFoundException
-
-    plugin_module = importlib.import_module('pybot.plugins.' + plugin_name)
-    plugin_class = getattr(plugin_module, plugin_name.capitalize())
-    plugin_logger = logger.getChild(plugin_name)
-    plugin_instance = plugin_class(plugin_name, plugin_logger)
-
-    for cmd_namd, cmd_obj in inspect.getmembers(
-            plugin_instance, lambda func: isinstance(func, command)):
-        cmd_obj._set_plugin(plugin_instance)
-        plugin_instance._add_command(cmd_obj)
-
-    return plugin_instance
-
-
 def split_message(message):
     lines = list()
     for line in message.split('\n'):
@@ -93,7 +74,10 @@ class command(object):
 
         self.plugin.logger.info('executing %s with args %r' % (
             self.func.func_name, func_args))
-        self.func(self.plugin, **func_args)
+        try:
+            self.func(self.plugin, **func_args)
+        except Exception as err:
+            self.plugin.logger.exception(err)
 
     def get_help(self):
         if not self.plugin:
@@ -124,24 +108,40 @@ class command(object):
         return False
 
 
+class admin_command(command):
+
+    def __call__(self, **kwargs):
+        if not self.plugin:
+            raise UnboundCommandExecutionException
+        if kwargs['user'] in self.plugin.bot.admins:
+            super(admin_command, self).__call__(**kwargs)
+        else:
+            self.plugin.logger.warn('admin command (%s) rejected, %s is not '
+                                    'an admin' % (self.name, kwargs['user']))
+
+
 class PybotPlugin(object):
 
     def __init__(self, name, logger):
         self.name = name
         self.logger = logger
-        self.commands = list()
+        self.command_list = list()
         self.bot = None
+
+        if hasattr(self, 'init') and callable(self.init):
+            self.init()
+
         self.logger.info('%s plugin loaded' % self.name)
 
     def __iter__(self):
-        for command in self.commands:
+        for command in self.command_list:
             yield command
 
     def __repr__(self):
         return '<%s plugin>' % self.name
 
     def _add_command(self, command):
-        self.commands.append(command)
+        self.command_list.append(command)
         self.logger.info('registered %r' % command)
 
     def _set_bot(self, bot):
@@ -151,9 +151,9 @@ class PybotPlugin(object):
 class Pybot(object):
 
     def __init__(self, server, port, nick, nickserv, password, channels,
-                 command_char):
+                 command_char, owner):
         self.server = server
-        self.port = port
+        self.port = int(port)
         self.nick = nick
         self.nickserv = nickserv
         self.password = password
@@ -161,6 +161,8 @@ class Pybot(object):
         self.command_char = command_char
         self.builtin = None
         self.plugins = dict()
+        self.owner = owner
+        self.admins = [owner]
 
     def connect(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -174,8 +176,8 @@ class Pybot(object):
         for channel in self.channels:
             self.send('JOIN %s' % channel)
 
-        self.builtin = load_plugin('builtin')
-        self.builtin._set_bot(self)
+        self.load_plugin('builtin')
+        self.builtin = self.plugins.pop('builtin')
 
         self.listen()
 
@@ -201,6 +203,26 @@ class Pybot(object):
             for msg in msg_chunks:
                 self.process_message(msg.strip('\r'))
 
+    def load_plugin(self, plugin_name):
+        path = os.path.join(DIR, 'plugins', plugin_name + '.py')
+
+        if not os.path.isfile(path):
+            raise PluginNotFoundException
+
+        plugin_module = importlib.import_module(
+            'pybot.plugins.' + plugin_name)
+        plugin_class = getattr(plugin_module, plugin_name.capitalize())
+        plugin_logger = logger.getChild(plugin_name)
+        plugin_instance = plugin_class(plugin_name, plugin_logger)
+
+        for cmd_name, cmd_obj in inspect.getmembers(
+                plugin_instance, lambda func: isinstance(func, command)):
+            cmd_obj._set_plugin(plugin_instance)
+            plugin_instance._add_command(cmd_obj)
+
+        plugin_instance._set_bot(self)
+        self.plugins[plugin_name] = plugin_instance
+
     def process_message(self, message):
         logger.debug('<< %s' % message)
 
@@ -211,7 +233,7 @@ class Pybot(object):
             self.process_privmsg(message)
 
     def process_privmsg(self, message):
-        matcher = re.search(r'^:.*!(.*)@(.*) PRIVMSG (.*) :(.*)$', message)
+        matcher = re.search(r'^:(.*)!.*@(.*) PRIVMSG (.*) :(.*)$', message)
 
         kwargs = {
             'user': matcher.group(1),
@@ -223,8 +245,12 @@ class Pybot(object):
 
         if kwargs['channel'] == self.nick:
             context = CONTEXT_QUERY
+            kwargs['channel'] = kwargs['user']
 
-        cmd = content.split()[0]
+        try:
+            cmd = content.split()[0]
+        except IndexError:
+            return
         if len(content.split()) > 1:
             kwargs['message'] = ' '.join(content.split()[1:])
 
@@ -241,7 +267,7 @@ class Pybot(object):
         for command in self.builtin:
             if command.name == cmd_name:
                 return command
-        for plugin in self.plugins:
+        for plugin in self.plugins.values():
             for command in plugin:
                 if command.name == cmd_name:
                     return command
@@ -253,15 +279,16 @@ class Pybot(object):
 
     def send_privmsg(self, channel, message, target=None):
         for line in split_message(message):
-            if target is not None:
+            if target is not None and target != channel:
                 self.send('PRIVMSG %s :%s: %s' % (channel, target, line))
             else:
-                self.send('PRIVMSG %s : %s' % (channel, line))
+                self.send('PRIVMSG %s :%s' % (channel, line))
 
 
 def run(args):
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('owner', help='The bot\'s lord and master.')
     parser.add_argument('-s', '--server', default='localhost',
                         help='The server to connect to.')
     parser.add_argument('-p', '--port', default=6667,
@@ -296,5 +323,5 @@ def run(args):
 
     # TODO fix command char
     pybot = Pybot(args.server, args.port, args.nick, args.nickserv,
-                  args.password, args.channels, '@')
+                  args.password, args.channels, '@', args.owner)
     pybot.connect()
