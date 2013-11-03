@@ -29,7 +29,7 @@ class Builtin(PybotPlugin):
         """
         Parts from a channel. Will part the current channel if no channel
         is specified.
-        %(command)s [<channel>]
+        %(command)s [<channel>] [<message>]
         """
         if message is not None:
             if message.split()[0].startswith('#') or \
@@ -90,23 +90,45 @@ class Builtin(PybotPlugin):
                               plugin_string, target=user)
 
     @command
-    def reload(self, message):
+    def reload(self, message, channel, user):
         """
-        Not implemented.
+        Reloads a plugin.
+        %(command)s <plugin>
         """
-        pass
+        try:
+            self.bot.plugins.pop(message)
+            self.bot.load_plugin(message)
+            self.bot.send_privmsg(channel, '%s plugin reloaded' %
+                                  message, target=user)
+        except KeyError:
+            self.bot.send_privmsg(channel, '%s plugin not found' %
+                                  message, target=user)
+        except PluginNotFoundException:
+            self.bot.send_privmsg(channel, '%s plugin not found' %
+                                  message, target=user)
+        except Exception as err:
+            self.bot.send_privmsg(channel, '%s: %s' %
+                                  (repr(err), err.message), target=user)
 
     @command
-    def unload(self, message):
+    def unload(self, message, channel, user):
         """
-        Not implemented.
+        Unloads a plugin.
+        %(command)s <plugin>
         """
-        pass
+        try:
+            self.bot.plugins.pop(message)
+            self.bot.send_privmsg(channel, '%s plugin unloaded' %
+                                  message, target=user)
+        except KeyError:
+            self.bot.send_privmsg(channel, '%s plugin not found' %
+                                  message, target=user)
 
     @command
     def load(self, message, channel, user):
         """
-        Not implemented.
+        Loads a plugin.
+        %(command)s <plugin>
         """
         try:
             self.bot.load_plugin(message)
