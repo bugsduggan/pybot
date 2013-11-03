@@ -65,12 +65,12 @@ class Builtin(PybotPlugin):
         %(command)s
         Shows all available commands.
         """
-        command_string = ' '.join(
+        command_string = ', '.join(
             [cmd.name for cmd in self.bot.builtin.command_list])
         self.bot.send_privmsg(channel, 'builtin - %s' %
                               command_string, target=user)
         for plugin_name, plugin in self.bot.plugins.iteritems():
-            command_string = ' '.join(
+            command_string = ', '.join(
                 [cmd.name for cmd in plugin.command_list])
             self.bot.send_privmsg(channel, '%s - %s' %
                                   (plugin_name, command_string), target=user)
@@ -85,7 +85,7 @@ class Builtin(PybotPlugin):
         if len(plugins) <= 0:
             self.bot.send_privmsg(channel, 'no plugins loaded', target=user)
             return
-        plugin_string = ' '.join(plugins.keys())
+        plugin_string = ', '.join(plugins.keys())
         self.bot.send_privmsg(channel, '%s' %
                               plugin_string, target=user)
 
@@ -160,7 +160,7 @@ class Builtin(PybotPlugin):
         %(command)s
         Lists all admins.
         """
-        admin_list = self.bot.admins
+        admin_list = ', '.join(self.bot.admins)
         self.bot.send_privmsg(channel, '%s' % admin_list, target=user)
 
     @admin_command
