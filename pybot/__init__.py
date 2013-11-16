@@ -289,7 +289,7 @@ class Pybot(object):
 def run(args):
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('owner', help='The bot\'s lord and master.')
+    parser.add_argument('owner', nargs='?', help='The bot\'s lord and master.')
     parser.add_argument('-s', '--server', default='localhost',
                         help='The server to connect to.')
     parser.add_argument('-p', '--port', default=6667,

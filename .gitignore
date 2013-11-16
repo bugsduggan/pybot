@@ -1,3 +1,4 @@
 .github.token
 .venv
+config.json
 *.pyc

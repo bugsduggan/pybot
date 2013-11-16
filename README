@@ -7,6 +7,8 @@ CLI args
 You can invoke the bot using the run.py script. It takes the following
 arguments/flags.
 
+-c --config   A json file specifying configuration options. This is by
+              far the easiest way to get up and running!
 -s --server   The server to connect to
 -p --port     The port to connect to
 -n --nick     The nick the bot will use
