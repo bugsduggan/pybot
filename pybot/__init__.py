@@ -152,7 +152,7 @@ class PybotPlugin(object):
 class Pybot(object):
 
     def __init__(self, server, port, nick, nickserv, password, channels,
-                 command_char, owner):
+                 command_char, owner, preload_plugins):
         self.server = server
         self.port = int(port)
         self.nick = nick
@@ -164,6 +164,7 @@ class Pybot(object):
         self.plugins = dict()
         self.owner = owner
         self.admins = [owner]
+        self.preload_plugins = preload_plugins
 
     def connect(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -179,6 +180,9 @@ class Pybot(object):
 
         self.load_plugin('builtin')
         self.builtin = self.plugins.pop('builtin')
+        for plugin in self.preload_plugins:
+            self.load_plugin(plugin)
+        del self.preload_plugins
 
         self.listen()
 
@@ -302,6 +306,8 @@ def run(args):
                         help='The bot\'s nickserv password.')
     parser.add_argument('-c', '--config', default='',
                         help='Load settings from a config file.')
+    parser.add_argument('--load', action='append', dest='plugins',
+                        help='Load this plugin on startup.')
     parser.add_argument('-v', '--verbose', action='store_true',
                         default=False,
                         help='Turn on verbose logging.')
@@ -327,5 +333,5 @@ def run(args):
 
     # TODO fix command char
     pybot = Pybot(args.server, args.port, args.nick, args.nickserv,
-                  args.password, args.channels, '@', args.owner)
+                  args.password, args.channels, '@', args.owner, args.plugins)
     pybot.connect()

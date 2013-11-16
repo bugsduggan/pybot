@@ -14,6 +14,7 @@ arguments/flags.
 -n --nick     The nick the bot will use
 -a --nickserv The name of nickserv on the network you're connecting to
 -w --password The password for nickserv
+   --load     Load this plugin on startup
 -v --verbose  Turn on verbose logging (see every message)
 
 The run.py script will also take the name of its owner and a list of channels. These will
