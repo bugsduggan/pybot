@@ -28,6 +28,5 @@ TODO list
 =========
 
 Allow setting command char from command line
-Allow setting all config from a json config file
 Write some more plugins
 Add support for trigger functions
